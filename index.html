@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="fr" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Virtual Suzuki Omnichord OM-108</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #05050a;
+            color: #f8fafc;
+            overflow-x: hidden;
+        }
+        .font-orbitron {
+            font-family: 'Orbitron', sans-serif;
+        }
+        /* Cosmic background animation */
+        .space-bg {
+            background: radial-gradient(ellipse at bottom, #1b1b3a 0%, #05050a 100%);
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+        }
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle var(--duration) infinite ease-in-out;
+        }
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.2; transform: scale(0.8); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+        /* Custom Neon Glows & Glassmorphism */
+        .neon-glow-cyan {
+            box-shadow: 0 0 15px rgba(6, 182, 212, 0.6), inset 0 0 10px rgba(6, 182, 212, 0.4);
+        }
+        .neon-glow-pink {
+            box-shadow: 0 0 15px rgba(236, 72, 153, 0.6), inset 0 0 10px rgba(236, 72, 153, 0.4);
+        }
+        .neon-glow-amber {
+            box-shadow: 0 0 15px rgba(245, 158, 11, 0.6), inset 0 0 10px rgba(245, 158, 11, 0.4);
+        }
+        .neon-glow-purple {
+            box-shadow: 0 0 15px rgba(168, 85, 247, 0.6), inset 0 0 10px rgba(168, 85, 247, 0.4);
+        }
+        .neon-glow-green {
+            box-shadow: 0 0 15px rgba(34, 197, 94, 0.6), inset 0 0 10px rgba(34, 197, 94, 0.4);
+        }
+        /* Strumplate styling */
+        .strumplate-strip {
+            background: linear-gradient(to bottom, #ec4899, #8b5cf6, #3b82f6, #06b6d4, #10b981, #f59e0b, #ef4444);
+            background-size: 100% 400%;
+            animation: gradientMove 10s ease infinite;
+            cursor: crosshair;
+            touch-action: none;
+        }
+        @keyframes gradientMove {
+            0% { background-position: 0% 0%; }
+            50% { background-position: 0% 100%; }
+            100% { background-position: 0% 0%; }
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0b0f19;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
+    </style>
+</head>
+<body class="h-full flex flex-col justify-between select-none">
+    <!-- Cosmic Space Background -->
+    <div class="space-bg" id="spaceBackground"></div>
+
+    <!-- Header / Navbar -->
+    <header class="w-full bg-slate-950/80 backdrop-blur-md border-b border-slate-800 px-4 py-3 flex flex-wrap items-center justify-between z-10">
+        <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 via-purple-600 to-pink-500 flex items-center justify-center neon-glow-cyan">
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/>
+                </svg>
+            </div>
+            <div>
+                <h1 class="font-orbitron font-extrabold text-xl tracking-wider bg-gradient-to-r from-cyan-400 via-pink-400 to-amber-400 bg-clip-text text-transparent">
+                    OMNICHORD OM-108
+                </h1>
+                <p class="text-xs text-slate-400 font-medium">Virtual Suzuki Synthesizer & Strumplate</p>
+            </div>
+        </div>
+
+        <div class="flex items-center space-x-4 mt-2 sm:mt-0">
+            <!-- Audio Engine Status / Start Button -->
+            <button id="audioStartBtn" class="px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-orbitron text-xs font-bold rounded-lg shadow-lg transition transform active:scale-95 neon-glow-cyan flex items-center space-x-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
+                <span id="audioStatusText">Activer le Son</span>
+            </button>
+            <button onclick="toggleHelpModal()" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 font-orbitron text-xs rounded-lg border border-slate-700 transition">
+                Aide & Guide
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Instrument Body -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-3 sm:p-6 flex flex-col lg:flex-row gap-6 items-center justify-center z-10">
+        
+        <!-- Left / Center Control Panel & Chord Matrix -->
+        <div class="flex-1 w-full bg-slate-900/90 backdrop-blur-xl border border-slate-700/60 rounded-3xl p-4 sm:p-6 shadow-2xl relative flex flex-col justify-between">
+            
+            <!-- Top Instrument Dashboard (Master, Tempo, Sustain, Volumes) -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6 bg-slate-950/60 p-4 rounded-2xl border border-slate-800">
+                <!-- Master Volume -->
+                <div class="flex flex-col">
+                    <label class="text-[10px] font-orbitron text-cyan-400 uppercase tracking-widest mb-1">Volume Maître</label>
+                    <input type="range" id="masterVol" min="0" max="1" step="0.05" value="0.7" class="accent-cyan-400 cursor-pointer">
+                </div>
+                <!-- Sustain -->
+                <div class="flex flex-col">
+                    <label class="text-[10px] font-orbitron text-pink-400 uppercase tracking-widest mb-1">Sustain</label>
+                    <input type="range" id="sustainVal" min="0.1" max="3.0" step="0.1" value="1.2" class="accent-pink-400 cursor-pointer">
+                </div>
+                <!-- Tempo -->
+                <div class="flex flex-col">
+                    <label class="text-[10px] font-orbitron text-amber-400 uppercase tracking-widest mb-1">Tempo (<span id="tempoDisplay">120</span> BPM)</label>
+                    <input type="range" id="tempoVal" min="60" max="180" step="1" value="120" class="accent-amber-400 cursor-pointer">
+                </div>
+                <!-- Chord Hold Switch -->
+                <div class="flex items-center justify-between bg-slate-900 px-3 py-2 rounded-xl border border-slate-800">
+                    <span class="text-xs font-orbitron text-purple-400">CHORD HOLD</span>
+                    <button id="chordHoldBtn" onclick="toggleChordHold()" class="w-10 h-6 bg-slate-800 rounded-full p-1 transition duration-300 relative border border-slate-700">
+                        <div id="chordHoldKnob" class="w-4 h-4 bg-slate-500 rounded-full transition-transform duration-300 transform"></div>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Voice Selectors (Main Tones) -->
+            <div class="mb-6">
+                <div class="flex justify-between items-center mb-2">
+                    <h2 class="text-xs font-orbitron text-cyan-400 tracking-wider">VOIX PRINCIPALE (TONES)</h2>
+                    <span id="currentVoiceLabel" class="text-xs font-bold text-pink-400 bg-pink-950/40 px-2 py-0.5 rounded border border-pink-800/60">Harp</span>
+                </div>
+                <div id="voiceButtons" class="grid grid-cols-2 sm:grid-cols-5 gap-2">
+                    <!-- Populated via JS -->
+                </div>
+            </div>
+
+            <!-- Rhythm / Drum Machine Patterns -->
+            <div class="mb-6">
+                <div class="flex justify-between items-center mb-2">
+                    <h2 class="text-xs font-orbitron text-amber-400 tracking-wider">RYTHMES / AUTO-ACCOMPAGNEMENT</h2>
+                    <div class="flex items-center space-x-2">
+                        <span id="currentRhythmLabel" class="text-xs font-bold text-amber-400 bg-amber-950/40 px-2 py-0.5 rounded border border-amber-800/60">Rock 1</span>
+                        <button id="rhythmPlayBtn" onclick="toggleRhythm()" class="px-3 py-1 bg-amber-600 hover:bg-amber-500 text-white font-orbitron text-xs rounded font-bold transition shadow">Start Rhythme</button>
+                    </div>
+                </div>
+                <div id="rhythmButtons" class="grid grid-cols-2 sm:grid-cols-5 gap-2">
+                    <!-- Populated via JS -->
+                </div>
+            </div>
+
+            <!-- Chord Buttons Matrix (Suzuki OM-108 Style: Roots & Qualities) -->
+            <div>
+                <div class="flex justify-between items-center mb-2">
+                    <h2 class="text-xs font-orbitron text-purple-400 tracking-wider">BOUTONS D'ACCORDS (CHORD SELECTION)</h2>
+                    <div class="text-xs text-slate-400">Accord Actif: <span id="activeChordDisplay" class="font-bold text-cyan-300 font-orbitron text-sm">C Major</span></div>
+                </div>
+
+                <!-- Root Note Selector -->
+                <div class="mb-3">
+                    <p class="text-[10px] text-slate-400 mb-1 font-orbitron">1. CHOISIR LA FONDAMENTALE (ROOT NOTE)</p>
+                    <div id="rootButtons" class="grid grid-cols-6 sm:grid-cols-12 gap-1.5">
+                        <!-- Populated via JS -->
+                    </div>
+                </div>
+
+                <!-- Chord Quality Selector -->
+                <div>
+                    <p class="text-[10px] text-slate-400 mb-1 font-orbitron">2. CHOISIR LE TYPE D'ACCORD (QUALITY)</p>
+                    <div id="qualityButtons" class="grid grid-cols-3 sm:grid-cols-9 gap-2">
+                        <!-- Populated via JS -->
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Right Side: The Iconic Strumplate (SonicStrings) & Instant Off -->
+        <div class="w-full lg:w-44 bg-slate-900/90 backdrop-blur-xl border border-slate-700/60 rounded-3xl p-4 flex flex-col items-center shadow-2xl relative">
+            
+            <div class="text-center mb-3">
+                <h3 class="font-orbitron font-bold text-xs text-cyan-400 tracking-wider">STRUMPLATE</h3>
+                <p class="text-[10px] text-slate-400">Glissez sans cliquer !</p>
+            </div>
+
+            <!-- Strumplate Vertical Ribbon -->
+            <div id="strumplate" class="w-full h-80 sm:h-96 rounded-2xl strumplate-strip relative shadow-inner border border-white/20 flex flex-col justify-between items-center py-2 overflow-hidden">
+                <div class="absolute inset-0 bg-black/20 pointer-events-none"></div>
+                <!-- Visual markers along the strumplate -->
+                <div class="w-full h-px bg-white/40 my-auto"></div>
+                <div class="w-full h-px bg-white/40 my-auto"></div>
+                <div class="w-full h-px bg-white/40 my-auto"></div>
+                <div class="w-full h-px bg-white/40 my-auto"></div>
+                <div class="w-full h-px bg-white/40 my-auto"></div>
+                <div class="absolute bottom-2 text-[10px] font-orbitron font-bold text-white tracking-widest bg-black/50 px-2 py-0.5 rounded backdrop-blur">STRUM</div>
+            </div>
+
+            <!-- Instant OFF Plate -->
+            <button onclick="instantOff()" class="mt-4 w-full py-3 bg-gradient-to-r from-red-600 to-rose-700 hover:from-red-500 hover:to-rose-600 text-white font-orbitron text-xs font-extrabold rounded-xl shadow-lg transition active:scale-95 border border-red-500/50">
+                INSTANT OFF
+            </button>
+        </div>
+
+    </main>
+
+    <!-- Help Modal / Guide -->
+    <div id="helpModal" class="fixed inset-0 bg-black/80 backdrop-blur-md hidden items-center justify-center z-50 p-4">
+        <div class="bg-slate-900 border border-slate-700 max-w-lg w-full rounded-3xl p-6 relative shadow-2xl">
+            <h3 class="font-orbitron font-bold text-lg text-cyan-400 mb-3">Guide d'utilisation de l'Omnichord</h3>
+            <ul class="text-sm text-slate-300 space-y-2 mb-6 list-disc list-inside">
+                <li><strong>Activer le Son :</strong> Cliquez sur le bouton "Activer le Son" en haut pour initialiser l'audio.</li>
+                <li><strong>Jouer des Accords :</strong> Sélectionnez une note fondamentale (C, C#, D...) et un type d'accord (Major, Minor, 7th...).</li>
+                <li><strong>Le Strumplate :</strong> Sur la barre verticale à droite, <em>faites glisser simplement votre souris</em> (ou votre doigt sur mobile) dessus <strong>sans même cliquer</strong> pour déclencher de superbes arpèges de harpe ou de synthé.</li>
+                <li><strong>Voix & Rhythmes :</strong> Changez de timbre (Harp, Celeste, Synth Strings, FM Piano...) et activez les rythmes intégrés (Rock, Disco, Hip Hop...).</li>
+            </ul>
+            <button onclick="toggleHelpModal()" class="w-full py-3 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-orbitron font-bold rounded-xl transition">
+                Compris, allons jouer !
+            </button>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="w-full text-center py-3 text-xs text-slate-500 border-t border-slate-900 z-10 font-orbitron">
+        Virtual Suzuki Omnichord OM-108 • Conçu pour une musique magnifique
+    </footer>
+
+    <!-- JavaScript Audio & Interaction Engine -->
+    <script>
+        // --- STARFIELD BACKGROUND ---
+        function createStars() {
+            const bg = document.getElementById('spaceBackground');
+            const count = 75;
+            for (let i = 0; i < count; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                const size = Math.random() * 2.5 + 1;
+                star.style.width = `${size}px`;
+                star.style.height = `${size}px`;
+                star.style.left = `${Math.random() * 100}%`;
+                star.style.top = `${Math.random() * 100}%`;
+                star.style.setProperty('--duration', `${Math.random() * 3 + 2}s`);
+                star.style.animationDelay = `${Math.random() * 3}s`;
+                bg.appendChild(star);
+            }
+        }
+        createStars();
+
+        // --- AUDIO CONTEXT & SYNTH ENGINE ---
+        let audioCtx = null;
+        let masterGain = null;
+        let isAudioInitialized = false;
+
+        function initAudio() {
+            if (isAudioInitialized) return;
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            audioCtx = new AudioContext();
+            masterGain = audioCtx.createGain();
+            masterGain.gain.value = parseFloat(document.getElementById('masterVol').value);
+            masterGain.connect(audioCtx.destination);
+            isAudioInitialized = true;
+            document.getElementById('audioStatusText').textContent = 'Audio Actif';
+            document.getElementById('audioStartBtn').classList.remove('from-cyan-500', 'to-blue-600', 'neon-glow-cyan');
+            document.getElementById('audioStartBtn').classList.add('bg-emerald-600', 'neon-glow-green');
+        }
+
+        document.getElementById('audioStartBtn').addEventListener('click', () => {
+            initAudio();
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        });
+
+        // Master Volume Control
+        document.getElementById('masterVol').addEventListener('input', (e) => {
+            if (masterGain) masterGain.gain.value = parseFloat(e.target.value);
+        });
+
+        // --- DATA STRUCTURES: NOTES, CHORDS, VOICES, RHYTHMS ---
+        const rootNotes = [
+            { name: 'C', freq: 261.63 },
+            { name: 'C#', freq: 277.18 },
+            { name: 'D', freq: 293.66 },
+            { name: 'D#', freq: 311.13 },
+            { name: 'E', freq: 329.63 },
+            { name: 'F', freq: 349.23 },
+            { name: 'F#', freq: 369.99 },
+            { name: 'G', freq: 392.00 },
+            { name: 'G#', freq: 415.30 },
+            { name: 'A', freq: 440.00 },
+            { name: 'A#', freq: 466.16 },
+            { name: 'B', freq: 493.88 }
+        ];
+
+        const chordQualities = [
+            { id: 'maj', name: 'Major', intervals: [0, 4, 7, 12, 16, 19, 24, 28] },
+            { id: 'min', name: 'Minor', intervals: [0, 3, 7, 12, 15, 19, 24, 27] },
+            { id: '7', name: '7th', intervals: [0, 4, 7, 10, 12, 16, 19, 22] },
+            { id: 'maj7', name: 'Maj7', intervals: [0, 4, 7, 11, 12, 16, 19, 23] },
+            { id: 'min7', name: 'Min7', intervals: [0, 3, 7, 10, 12, 15, 19, 22] },
+            { id: 'dim', name: 'Dim', intervals: [0, 3, 6, 9, 12, 15, 18, 21] },
+            { id: 'aug', name: 'Aug', intervals: [0, 4, 8, 12, 16, 20, 24] },
+            { id: 'sus4', name: 'Sus4', intervals: [0, 5, 7, 12, 17, 19, 24] },
+            { id: 'add9', name: 'Add9', intervals: [0, 4, 7, 14, 12, 16, 19, 26] }
+        ];
+
+        // Authentic Suzuki Omnichord dual-voice presets
+        const voices = [
+            { id: 'harp', name: 'Harp', mainType: 'triangle', subType: 'sine', filter: 2400, subMult: 2.0 },
+            { id: 'omni1', name: 'Omni 1', mainType: 'sawtooth', subType: 'triangle', filter: 1400, subMult: 1.0 },
+            { id: 'omni2', name: 'Omni 2', mainType: 'square', subType: 'triangle', filter: 1800, subMult: 0.5 },
+            { id: 'celeste', name: 'Celeste', mainType: 'sine', subType: 'sine', filter: 3800, subMult: 4.0 },
+            { id: 'strings', name: 'Synth Strings', mainType: 'sawtooth', subType: 'sawtooth', filter: 1200, subMult: 1.0 },
+            { id: 'fmpiano', name: 'FM Piano', mainType: 'sine', subType: 'triangle', filter: 2800, subMult: 2.0 },
+            { id: 'apiano', name: 'Acoustic Piano', mainType: 'triangle', subType: 'sine', filter: 2200, subMult: 1.0 },
+            { id: 'guitar', name: 'Guitar', mainType: 'sawtooth', subType: 'sine', filter: 1600, subMult: 1.0 },
+            { id: 'organ', name: 'Organ', mainType: 'square', subType: 'square', filter: 2200, subMult: 2.0 },
+            { id: 'vibes', name: 'Vibes', mainType: 'sine', subType: 'triangle', filter: 3200, subMult: 3.0 }
+        ];
+
+        const rhythms = [
+            { id: 'rock1', name: 'Rock 1' },
+            { id: 'rock2', name: 'Rock 2' },
+            { id: 'slowrock', name: 'Slow Rock' },
+            { id: 'country', name: 'Country' },
+            { id: 'swing', name: 'Swing' },
+            { id: 'disco', name: 'Disco' },
+            { id: 'hiphop', name: 'Hip Hop' },
+            { id: 'funk', name: 'Funk' },
+            { id: 'bossa', name: 'Bossa Nova' },
+            { id: 'waltz', name: 'Waltz' }
+        ];
+
+        // Current state
+        let currentRoot = rootNotes[0]; // C
+        let currentQuality = chordQualities[0]; // Major
+        let currentVoice = voices[0];
+        let currentRhythm = rhythms[0];
+        let chordHold = false;
+        let isRhythmPlaying = false;
+        let rhythmInterval = null;
+        let tempo = 120;
+
+        // --- RENDER UI BUTTONS ---
+        function renderUI() {
+            // Root buttons
+            const rootContainer = document.getElementById('rootButtons');
+            rootContainer.innerHTML = '';
+            rootNotes.forEach(rn => {
+                const btn = document.createElement('button');
+                btn.className = `py-2 rounded-xl font-orbitron text-xs font-bold transition border ${currentRoot.name === rn.name ? 'bg-cyan-500 text-slate-950 border-cyan-300 neon-glow-cyan' : 'bg-slate-800 text-slate-200 border-slate-700 hover:bg-slate-700'}`;
+                btn.textContent = rn.name;
+                btn.onclick = () => {
+                    currentRoot = rn;
+                    updateActiveChord();
+                    renderUI();
+                };
+                rootContainer.appendChild(btn);
+            });
+
+            // Quality buttons
+            const qualContainer = document.getElementById('qualityButtons');
+            qualContainer.innerHTML = '';
+            chordQualities.forEach(q => {
+                const btn = document.createElement('button');
+                btn.className = `py-2 px-1 rounded-xl font-orbitron text-xs font-bold transition border ${currentQuality.id === q.id ? 'bg-pink-500 text-white border-pink-300 neon-glow-pink' : 'bg-slate-800 text-slate-200 border-slate-700 hover:bg-slate-700'}`;
+                btn.textContent = q.name;
+                btn.onclick = () => {
+                    currentQuality = q;
+                    updateActiveChord();
+                    renderUI();
+                };
+                qualContainer.appendChild(btn);
+            });
+
+            // Voice buttons
+            const voiceContainer = document.getElementById('voiceButtons');
+            voiceContainer.innerHTML = '';
+            voices.forEach(v => {
+                const btn = document.createElement('button');
+                btn.className = `p-2.5 rounded-xl font-orbitron text-xs font-semibold transition border text-center truncate ${currentVoice.id === v.id ? 'bg-cyan-500 text-slate-950 border-cyan-300 neon-glow-cyan font-bold' : 'bg-slate-800/80 text-slate-300 border-slate-700 hover:bg-slate-700'}`;
+                btn.textContent = v.name;
+                btn.onclick = () => {
+                    currentVoice = v;
+                    document.getElementById('currentVoiceLabel').textContent = v.name;
+                    renderUI();
+                };
+                voiceContainer.appendChild(btn);
+            });
+
+            // Rhythm buttons
+            const rhythmContainer = document.getElementById('rhythmButtons');
+            rhythmContainer.innerHTML = '';
+            rhythms.forEach(r => {
+                const btn = document.createElement('button');
+                btn.className = `p-2.5 rounded-xl font-orbitron text-xs font-semibold transition border text-center truncate ${currentRhythm.id === r.id ? 'bg-amber-500 text-slate-950 border-amber-300 neon-glow-amber font-bold' : 'bg-slate-800/80 text-slate-300 border-slate-700 hover:bg-slate-700'}`;
+                btn.textContent = r.name;
+                btn.onclick = () => {
+                    currentRhythm = r;
+                    document.getElementById('currentRhythmLabel').textContent = r.name;
+                    renderUI();
+                    if (isRhythmPlaying) {
+                        restartRhythm();
+                    }
+                };
+                rhythmContainer.appendChild(btn);
+            });
+        }
+
+        function updateActiveChord() {
+            const chordName = `${currentRoot.name} ${currentQuality.name}`;
+            document.getElementById('activeChordDisplay').textContent = chordName;
+        }
+
+        function toggleChordHold() {
+            chordHold = !chordHold;
+            const knob = document.getElementById('chordHoldKnob');
+            const btn = document.getElementById('chordHoldBtn');
+            if (chordHold) {
+                knob.style.transform = 'translateX(16px)';
+                btn.classList.add('border-purple-500', 'neon-glow-purple');
+            } else {
+                knob.style.transform = 'translateX(0px)';
+                btn.classList.remove('border-purple-500', 'neon-glow-purple');
+            }
+        }
+
+        // --- AUTHENTIC DUAL-VOICE SUZUKI SYNTHESIS ENGINE ---
+        function playNote(freq, sustainMultiplier = 1.0) {
+            if (!audioCtx || !isAudioInitialized) return;
+            try {
+                const now = audioCtx.currentTime;
+                const sustain = parseFloat(document.getElementById('sustainVal').value) * sustainMultiplier;
+
+                // Main Voice Oscillator
+                const oscMain = audioCtx.createOscillator();
+                const gainMain = audioCtx.createGain();
+
+                // Sub Voice Oscillator (Authentic Suzuki Layering)
+                const oscSub = audioCtx.createOscillator();
+                const gainSub = audioCtx.createGain();
+
+                const filter = audioCtx.createBiquadFilter();
+
+                oscMain.type = currentVoice.mainType;
+                oscMain.frequency.setValueAtTime(freq, now);
+
+                oscSub.type = currentVoice.subType;
+                oscSub.frequency.setValueAtTime(freq * currentVoice.subMult, now);
+
+                filter.type = 'lowpass';
+                filter.frequency.setValueAtTime(currentVoice.filter, now);
+
+                // Main Voice Envelope
+                gainMain.gain.setValueAtTime(0, now);
+                gainMain.gain.linearRampToValueAtTime(0.35, now + 0.015);
+                gainMain.gain.exponentialRampToValueAtTime(0.0001, now + sustain);
+
+                // Sub Voice Envelope
+                gainSub.gain.setValueAtTime(0, now);
+                gainSub.gain.linearRampToValueAtTime(0.15, now + 0.02);
+                gainSub.gain.exponentialRampToValueAtTime(0.0001, now + (sustain * 0.8));
+
+                oscMain.connect(gainMain);
+                oscSub.connect(gainSub);
+
+                gainMain.connect(filter);
+                gainSub.connect(filter);
+
+                filter.connect(masterGain);
+
+                oscMain.start(now);
+                oscSub.start(now);
+
+                oscMain.stop(now + sustain);
+                oscSub.stop(now + sustain);
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        function playFullChordStrum() {
+            if (!audioCtx || !isAudioInitialized) return;
+            const intervals = currentQuality.intervals;
+            intervals.forEach((interval, index) => {
+                const noteFreq = currentRoot.freq * Math.pow(2, interval / 12);
+                setTimeout(() => {
+                    playNote(noteFreq, 1.5);
+                }, index * 40); // Arpeggiated chord strum
+            });
+        }
+
+        // Trigger chord when chord root/quality is clicked
+        // Also trigger full chord strum
+        function triggerActiveChordSound() {
+            playFullChordStrum();
+        }
+
+        // Hook up chord click triggers
+        document.addEventListener('click', (e) => {
+            // If clicking root or quality button, play chord
+            if (e.target.closest('#rootButtons') || e.target.closest('#qualityButtons')) {
+                initAudio();
+                if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+                playFullChordStrum();
+            }
+        });
+
+        // --- STRUMPLATE (SONIC STRINGS) INTERACTION ---
+        // User requested: "Avec la souris, on peut jouer la petite bande avec la souris en faisant glisser simplement la souris dessus sans même cliquer"
+        const strumplateEl = document.getElementById('strumplate');
+        let lastPlayedIndex = -1;
+        let throttleTimer = 0;
+
+        function handleStrumMove(clientY) {
+            if (!audioCtx || !isAudioInitialized) return;
+            const rect = strumplateEl.getBoundingClientRect();
+            const y = clientY - rect.top;
+            const height = rect.height;
+            if (y < 0 || y > height) return;
+
+            // Divide strumplate into 8 zones corresponding to chord intervals/octaves
+            const zones = 8;
+            const zoneIndex = Math.floor((y / height) * zones);
+
+            if (zoneIndex !== lastPlayedIndex || Date.now() - throttleTimer > 100) {
+                lastPlayedIndex = zoneIndex;
+                throttleTimer = Date.now();
+
+                const intervals = currentQuality.intervals;
+                const interval = intervals[zoneIndex % intervals.length];
+                const octaveShift = Math.floor(zoneIndex / intervals.length);
+                const noteFreq = currentRoot.freq * Math.pow(2, interval / 12) * Math.pow(2, octaveShift);
+                
+                playNote(noteFreq, 0.8);
+            }
+        }
+
+        strumplateEl.addEventListener('pointermove', (e) => {
+            handleStrumMove(e.clientY);
+        });
+
+        strumplateEl.addEventListener('touchmove', (e) => {
+            if (e.touches && e.touches[0]) {
+                handleStrumMove(e.touches[0].clientY);
+            }
+        }, { passive: true });
+
+        function instantOff() {
+            if (audioCtx) {
+                // Instantly mute by closing and recreating audio context or stopping nodes
+                // For simplicity and safety, we can briefly cut master gain
+                if (masterGain) {
+                    masterGain.gain.setValueAtTime(0, audioCtx.currentTime);
+                    setTimeout(() => {
+                        masterGain.gain.setValueAtTime(parseFloat(document.getElementById('masterVol').value), audioCtx.currentTime + 0.1);
+                    }, 150);
+                }
+            }
+        }
+
+        // --- RHYTHM / DRUM MACHINE ENGINE ---
+        function playDrumSound(type) {
+            if (!audioCtx || !isAudioInitialized) return;
+            const now = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+
+            if (type === 'kick') {
+                osc.frequency.setValueAtTime(150, now);
+                osc.frequency.exponentialRampToValueAtTime(30, now + 0.15);
+                gain.gain.setValueAtTime(0.7, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+                osc.connect(gain);
+                gain.connect(masterGain);
+                osc.start(now);
+                osc.stop(now + 0.15);
+            } else if (type === 'snare') {
+                // Noise snare
+                const bufferSize = audioCtx.sampleRate * 0.1;
+                const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+                const output = buffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) {
+                    output[i] = Math.random() * 2 - 1;
+                }
+                const noise = audioCtx.createBufferSource();
+                noise.buffer = buffer;
+                const filter = audioCtx.createBiquadFilter();
+                filter.type = 'highpass';
+                filter.frequency.value = 1000;
+                gain.gain.setValueAtTime(0.4, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+                noise.connect(filter);
+                filter.connect(gain);
+                gain.connect(masterGain);
+                noise.start(now);
+            } else if (type === 'hihat') {
+                const bufferSize = audioCtx.sampleRate * 0.05;
+                const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+                const output = buffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) {
+                    output[i] = Math.random() * 2 - 1;
+                }
+                const noise = audioCtx.createBufferSource();
+                noise.buffer = buffer;
+                const filter = audioCtx.createBiquadFilter();
+                filter.type = 'highpass';
+                filter.frequency.value = 5000;
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+                noise.connect(filter);
+                filter.connect(gain);
+                gain.connect(masterGain);
+                noise.start(now);
+            }
+        }
+
+        let step = 0;
+        function stepRhythm() {
+            if (!isRhythmPlaying) return;
+            // Basic 16-step sequencer patterns
+            const patterns = {
+                rock1: [1,0,0,0, 2,0,0,0, 1,0,3,0, 2,0,0,0],
+                rock2: [1,3,2,3, 1,3,2,3, 1,3,2,3, 1,3,2,3],
+                slowrock: [1,0,0,2,0,0, 1,0,0,2,0,0],
+                country: [1,3,2,3, 1,3,2,3],
+                swing: [1,0,3, 1,0,3, 1,0,3],
+                disco: [1,3,1,3, 1,3,1,3, 1,3,1,3, 1,3,1,3],
+                hiphop: [1,0,0,2, 0,3,1,0, 2,0,0,3, 1,0,2,0],
+                funk: [1,3,1,2, 3,1,2,3, 1,3,1,2, 3,1,2,3],
+                bossa: [1,0,2,0, 1,0,2,0],
+                waltz: [1,3,3, 1,3,3]
+            };
+
+            const currentPattern = patterns[currentRhythm.id] || patterns.rock1;
+            const hit = currentPattern[step % currentPattern.length];
+
+            if (hit === 1) playDrumSound('kick');
+            if (hit === 2) playDrumSound('snare');
+            if (hit === 3) playDrumSound('hihat');
+
+            step++;
+        }
+
+        function startRhythm() {
+            if (isRhythmPlaying) return;
+            isRhythmPlaying = true;
+            document.getElementById('rhythmPlayBtn').textContent = 'Stop Rhythme';
+            document.getElementById('rhythmPlayBtn').classList.remove('bg-amber-600', 'hover:bg-amber-500');
+            document.getElementById('rhythmPlayBtn').classList.add('bg-rose-600', 'hover:bg-rose-500');
+
+            const bpm = parseInt(document.getElementById('tempoVal').value);
+            const intervalTime = (60 / bpm / 4) * 1000; // 16th notes
+            rhythmInterval = setInterval(stepRhythm, intervalTime);
+        }
+
+        function stopRhythm() {
+            isRhythmPlaying = false;
+            clearInterval(rhythmInterval);
+            document.getElementById('rhythmPlayBtn').textContent = 'Start Rhythme';
+            document.getElementById('rhythmPlayBtn').classList.remove('bg-rose-600', 'hover:bg-rose-500');
+            document.getElementById('rhythmPlayBtn').classList.add('bg-amber-600', 'hover:bg-amber-500');
+        }
+
+        function toggleRhythm() {
+            initAudio();
+            if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+            if (isRhythmPlaying) {
+                stopRhythm();
+            } else {
+                startRhythm();
+            }
+        }
+
+        function restartRhythm() {
+            stopRhythm();
+            startRhythm();
+        }
+
+        // Tempo slider listener
+        document.getElementById('tempoVal').addEventListener('input', (e) => {
+            tempo = parseInt(e.target.value);
+            document.getElementById('tempoDisplay').textContent = tempo;
+            if (isRhythmPlaying) {
+                restartRhythm();
+            }
+        });
+
+        // Help Modal toggle
+        function toggleHelpModal() {
+            const modal = document.getElementById('helpModal');
+            modal.classList.toggle('hidden');
+            modal.classList.toggle('flex');
+        }
+
+        // Initial render
+        renderUI();
+        updateActiveChord();
+    </script>
+</body>
+</html>
